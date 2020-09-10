@@ -2,7 +2,7 @@ name: auto_enrollment
 
 on:
   schedule:
-  - cron: '40 15 * * 3'
+  - cron: '45 13 * * 3'
 
 jobs:
   enroll:
