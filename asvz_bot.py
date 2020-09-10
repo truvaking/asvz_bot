@@ -30,7 +30,25 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
+def waiting_fct():
+    #if script is started before registration time. Does only work if script is executed on day before event.
+    currentTime = datetime.today()
+    enrollmentTime = datetime.strptime(lesson_time, '%H:%M')
+    enrollmentTime = enrollmentTime.replace(hour=enrollmentTime.hour + (24-enrollment_time_difference))
+    
+    while currentTime.hour < enrollmentTime.hour:
+        print("Wait for enrollment to open")
+        time.sleep(60)
+        currentTime = datetime.today()
 
+    if currentTime.hour == enrollmentTime.hour:
+        while currentTime.minute < enrollmentTime.minute:
+            print("Wait for enrollment to open")
+            time.sleep(30)
+            currentTime = datetime.today()
+	
+    return
+    
 
 #run enrollment script:
 i = 0 #count
