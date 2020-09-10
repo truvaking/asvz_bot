@@ -50,7 +50,8 @@ def waiting_fct():
             print("Wait for enrollment to open")
             time.sleep(30)
             currentTime = datetime.today()
-	    print("DEBUG 4")
+	    
+        print("DEBUG 4")
 
     return
     
