@@ -5,11 +5,11 @@ This is a simple ASVZ (Akademischer Sportverband Zürich) enrollment script for 
 
 Full instructions to set it up for automatic weekly enrollment are given below.
 
-Works on the current version of the ASVZ website as of March 2019.
+Works on the current version of the ASVZ website as of September 2020.
 
 ## Installation
 
-These instructions are for Ubuntu. It was tested on Ubuntu 16.04, Python 3.5.2 and Firefox 65.0 with corresponding Geckodriver v0.24.0. Adapt to your own system if necessary.
+These instructions are for Ubuntu. It was tested on Ubuntu 18.04, Python 3.6.9 and Firefox 80.0 with corresponding Geckodriver v0.27.0. Adapt to your own system if necessary.
 
 Clone this repository:
 
@@ -32,11 +32,11 @@ Install Selenium and Firefox webdriver:
 pip install --upgrade pip
 pip install selenium
 cd Downloads
-wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
+wget https://github.com/mozilla/geckodriver/releases/download/v0.27.0/geckodriver-v0.27.0-linux64.tar.gz
 tar -xvzf geckodriver*
 chmod +x geckodriver
 sudo mv geckodriver /usr/local/bin/
-rm geckodriver-v0.24.0-linux64.tar.gz
+rm geckodriver-v0.27.0-linux64.tar.gz
 deactivate
 ```
 
@@ -80,4 +80,3 @@ PATH=/usr/local/bin:/usr/local/sbin:/sbin:/usr/sbin:/bin:/usr/bin:/usr/bin/X11
 # m h  dom mon dow   command
 30 21 * * 3 /home/<user>/asvz_bot_python/bin/python /home/<user>/asvz_bot/asvz_bot.py > /home/<user>/asvz_bot/asvz.log 2>&1
 ```
-
