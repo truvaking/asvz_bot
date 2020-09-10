@@ -23,5 +23,5 @@ jobs:
       - name: Execute script
         run: |
           echo Started execute script
-          python asvz_bot.py
+          python asvz_bot_copy.py
           echo Started execution
