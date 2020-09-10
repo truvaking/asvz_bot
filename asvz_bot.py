@@ -98,6 +98,8 @@ def asvz_enroll():
 i = 0 #count
 success = False
 
+print("Started waiting")
+
 waiting_fct()
 
 #if there is an exception (no registration possible), enrollment is tried again in total 5 times and then stopped to avoid a lock-out
