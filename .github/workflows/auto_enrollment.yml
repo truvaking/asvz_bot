@@ -1,14 +1,25 @@
 name: auto_enrollment
 
+# on: 
+#  schedule: # only runs on master branch
+#  - cron: '54 13 * * *'
+
 on:
-  schedule:
-  - cron: '54 13 * * *'
+  push
 
 jobs:
   enroll:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install selenium geckodriver-autoinstaller
       - name: Execute script
         run: |
           cd $GITHUB_WORKSPACE
