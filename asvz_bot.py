@@ -1,4 +1,4 @@
-#!/home/<user>/asvz_bot_python/bin/python
+#!/user/bin/env python
 
 """
 Created on: Mar 20, 2019

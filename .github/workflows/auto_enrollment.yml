@@ -23,6 +23,5 @@ jobs:
       - name: Execute script
         run: |
           echo Started execute script
-          cd $GITHUB_WORKSPACE
           python asvz_bot.py
           echo Started execution
