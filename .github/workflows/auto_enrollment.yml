@@ -1,7 +1,8 @@
 name: auto_enrollment
 
 on:
-  push
+  schedule:
+  - cron: '54 13 * * *'
 
 jobs:
   enroll:
