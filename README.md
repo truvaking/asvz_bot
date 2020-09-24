@@ -57,7 +57,7 @@ Run script once for single enrollment at defined time on the day before enrollme
 cd 
 source asvz_bot_python/bin/activate
 cd asvz_bot
-python asvz_bot.py
+python asvz_bot.py username password
 ```
 
 ### 2. Create a cron job

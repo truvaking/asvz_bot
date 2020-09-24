@@ -7,11 +7,13 @@ License: BSD 3-Clause
 Description: Script for automatic enrollment in ASVZ classes
 """
 
+import sys 
+
 ############################# Edit this: ######################################
 
 #ETH credentials:
-username = 'xxxx'
-password = 'xxxx'
+username = str(sys.argv[1])
+password = str(sys.argv[2])
 day = 'Donnerstag'
 facility = 'Sport Center Polyterrasse'
 lesson_time = '19:30'
@@ -20,6 +22,9 @@ enrollment_time_difference = 22 #how many hours before registration starts
 sportfahrplan_particular = 'https://asvz.ch/426-sportfahrplan?f[0]=sport:45645'
 
 ###############################################################################
+
+print("Username: " + str(sys.argv[1]))
+print("Password: " + str(sys.argv[2]))
 
 import time
 from datetime import datetime
