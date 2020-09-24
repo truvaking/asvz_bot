@@ -26,3 +26,5 @@ jobs:
           echo Started execute script
           python asvz_bot.py
           echo Started execution
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
