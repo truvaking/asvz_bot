@@ -12,16 +12,12 @@ Description: Script for automatic enrollment in ASVZ classes
 #ETH credentials:
 username = 'xxxx'
 password = 'xxxx'
-day = 'Donnerstag'
-facility = 'Sport Center Polyterrasse'
-lesson_time = '19:30'
-enrollment_time_difference = 22 #how many hours before registration starts
-#link to particular sport on ASVZ Sportfahrplan, e.g. cycling class:
-sportfahrplan_particular = 'https://asvz.ch/426-sportfahrplan?f[0]=sport:45645'
 
 ###############################################################################
 
 import time
+import argparse
+import configparser
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
@@ -34,7 +30,7 @@ def waiting_fct():
     #if script is started before registration time. Does only work if script is executed on day before event.
     currentTime = datetime.today()
     enrollmentTime = datetime.strptime(lesson_time, '%H:%M')
-    enrollmentTime = enrollmentTime.replace(hour=enrollmentTime.hour + (24-enrollment_time_difference))
+    enrollmentTime = enrollmentTime.replace(hour=enrollmentTime.hour + (24-config['default'].getint('enrollment_time_difference')))
     
     while currentTime.hour < enrollmentTime.hour:
         print("Wait for enrollment to open")
@@ -61,9 +57,12 @@ def asvz_enroll():
         driver.implicitly_wait(20) #wait 20 seconds if not defined differently
         print("Headless Firefox Initialized")
         #find corresponding day div:
-        day_ele = driver.find_element_by_xpath("//div[@class='teaser-list-calendar__day'][contains(., '" + day + "')]")
+        day_ele = driver.find_element_by_xpath("//div[@class='teaser-list-calendar__day'][contains(., '" + config['default']['day'] + "')]")
         #search in day div after corresponding location and time
-        day_ele.find_element_by_xpath(".//li[@class='btn-hover-parent'][contains(., '" + facility + "')][contains(., '" + lesson_time + "')]").click()
+        if description:
+            day_ele.find_element_by_xpath(".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" + config['default']['lesson_time'] + "')][contains(., '" + config['default']['description'] + "')]").click()
+        else:
+            day_ele.find_element_by_xpath(".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" + config['default']['lesson_time'] + "')]").click()
 
         WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//a[@class='btn btn--block btn--icon relative btn--primary-border' or @class='btn btn--block btn--icon relative btn--primary']"))).click()
 
@@ -94,13 +93,21 @@ def asvz_enroll():
     driver.quit #close all tabs and window
     return True
 
-#run enrollment script:
-i = 0 #count
-success = False
+
+# ==== run enrollment script ============================================
+
+parser = argparse.ArgumentParser(description='ASVZ Bot script')
+parser.add_argument('config_file', type=str, help='config file name')
+args = parser.parse_args()
+
+config = configparser.ConfigParser()
+config.read(args.config_file)
 
 waiting_fct()
 
 #if there is an exception (no registration possible), enrollment is tried again in total 5 times and then stopped to avoid a lock-out
+i = 0 #count
+success = False
 while not success:
     try:
         success = asvz_enroll()
