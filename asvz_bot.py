@@ -9,7 +9,7 @@ Description: Script for automatic enrollment in ASVZ classes
 
 ############################# Edit this: ######################################
 
-#ETH credentials:
+# ETH credentials:
 username = 'xxxx'
 password = 'xxxx'
 
@@ -49,65 +49,71 @@ def waiting_fct():
     return
 
 
-def asvz_enroll():
+def asvz_enroll(args):
     print('Attempting enroll...')
     options = Options()
-    # options.headless = True
+    options.headless = True
     options.add_argument("--private")  # open in private mode to avoid different login scenario
     driver = webdriver.Firefox(options=options)
-    print('Got driver')
+
+    print('Trying to get sportfahrplan')
+    driver.get(config['default']['sportfahrplan_particular'])
+    driver.implicitly_wait(5)  # wait 5 seconds if not defined differently
+    print("Headless Firefox Initialized")
+    # find corresponding day div:
+    day_ele = driver.find_element_by_xpath(
+        "//div[@class='teaser-list-calendar__day'][contains(., '" + config['default']['day'] + "')]")
+    # search in day div after corresponding location and time
+    if config['default']['description']:
+        day_ele.find_element_by_xpath(
+            ".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" +
+            config['default']['lesson_time'] + "')][contains(., '" + config['default'][
+                'description'] + "')]").click()
+    else:
+        day_ele.find_element_by_xpath(
+            ".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" +
+            config['default']['lesson_time'] + "')]").click()
+
+    WebDriverWait(driver, args.max_wait).until(EC.element_to_be_clickable((By.XPATH,
+                                                                           "//a[@class='btn btn--block btn--icon relative btn--primary-border' or @class='btn btn--block btn--icon relative btn--primary']"))).click()
+
+    # switch to new window:
+    time.sleep(2)  # necessary because tab needs to be open to get window handles
+    tabs = driver.window_handles
+    driver.switch_to.window(tabs[1])
+    WebDriverWait(driver, args.max_wait).until(EC.element_to_be_clickable(
+        (By.XPATH, "//button[@class='btn btn-default ng-star-inserted' and @title='Login']"))).click()
+    WebDriverWait(driver, args.max_wait).until(EC.element_to_be_clickable(
+        (By.XPATH, "//button[@class='btn btn-warning btn-block' and @title='SwitchAai Account Login']"))).click()
+
+    # choose organization:
+    organization = driver.find_element_by_xpath("//input[@id='userIdPSelection_iddtext']")
+    organization.send_keys('ETH Zurich')
+    organization.send_keys(u'\ue006')
+
+    driver.find_element_by_xpath("//input[@id='username']").send_keys(username)
+    driver.find_element_by_xpath("//input[@id='password']").send_keys(password)
+    driver.find_element_by_xpath("//button[@type='submit']").click()
+
+    enroll_button_locator = (By.XPATH,
+                             "//button[@id='btnRegister' and @class='btn-primary btn enrollmentPlacePadding ng-star-inserted']")
+    try:
+        WebDriverWait(driver, args.max_wait).until(EC.visibility_of_element_located(enroll_button_locator))
+    except:
+        print('Element not visible. Probably fully booked. Retrying in ' + str(args.retry_time) + 'min')
+        time.sleep(args.retry_time * 60)
+        return False
 
     try:
-        print('Trying to get sportfahrplan')
-        driver.get(config['default']['sportfahrplan_particular'])
-        driver.implicitly_wait(5)  # wait 20 seconds if not defined differently
-        print("Headless Firefox Initialized")
-        # find corresponding day div:
-        day_ele = driver.find_element_by_xpath(
-            "//div[@class='teaser-list-calendar__day'][contains(., '" + config['default']['day'] + "')]")
-        # search in day div after corresponding location and time
-        if config['default']['description']:
-            day_ele.find_element_by_xpath(
-                ".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" +
-                config['default']['lesson_time'] + "')][contains(., '" + config['default'][
-                    'description'] + "')]").click()
-        else:
-            day_ele.find_element_by_xpath(
-                ".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" +
-                config['default']['lesson_time'] + "')]").click()
+        enroll_button = WebDriverWait(driver, args.max_wait).until(EC.element_to_be_clickable(enroll_button_locator))
+    except:
+        raise ('Enroll button is disabled. Enrollment is likely not open yet.')
 
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH,
-                                                                    "//a[@class='btn btn--block btn--icon relative btn--primary-border' or @class='btn btn--block btn--icon relative btn--primary']"))).click()
+    enroll_button.click()
+    print("Successfully enrolled. Train hard and have fun!")
 
-        # switch to new window:
-        time.sleep(2)  # necessary because tab needs to be open to get window handles
-        tabs = driver.window_handles
-        driver.switch_to.window(tabs[1])
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (By.XPATH, "//button[@class='btn btn-default ng-star-inserted' and @title='Login']"))).click()
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (By.XPATH, "//button[@class='btn btn-warning btn-block' and @title='SwitchAai Account Login']"))).click()
-
-        # choose organization:
-        organization = driver.find_element_by_xpath("//input[@id='userIdPSelection_iddtext']")
-        organization.send_keys('ETH Zurich')
-        organization.send_keys(u'\ue006')
-
-        driver.find_element_by_xpath("//input[@id='username']").send_keys(username)
-        driver.find_element_by_xpath("//input[@id='password']").send_keys(password)
-        driver.find_element_by_xpath("//button[@type='submit']").click()
-
-        # wait for button to be clickable for 5 minutes, which is more than enough
-        # still needs to be tested what happens if we are on the page before button is enabled
-        WebDriverWait(driver, 300).until(EC.element_to_be_clickable((By.XPATH,
-                                                                     "//button[@id='btnRegister' and @class='btn-primary btn enrollmentPlacePadding ng-star-inserted']"))).click()
-        print("Successfully enrolled. Train hard and have fun!")
-    except:  # using non-specific exceptions, since there are different exceptions possible: timeout, element not found because not loaded, etc.
-        print('Try failed')
-        driver.quit()
-        raise  # re-raise previous exception
-
-    driver.quit  # close all tabs and window
+    WebDriverWait(driver, 2)
+    driver.quit()  # close all tabs and window
     return True
 
 
@@ -120,6 +126,9 @@ geckodriver_autoinstaller.install()
 
 parser = argparse.ArgumentParser(description='ASVZ Bot script')
 parser.add_argument('config_file', type=str, help='config file name')
+parser.add_argument('--retry_time', type=int, default=5,
+                    help='Time between retrying when class is already fully booked in seconds')
+parser.add_argument('--max_wait', type=int, default=20, help='Max driver wait time (s) when attempting an action')
 args = parser.parse_args()
 
 config = configparser.ConfigParser(allow_no_value=True)
@@ -128,16 +137,10 @@ config.read(args.config_file)
 waiting_fct()
 
 # if there is an exception (no registration possible), enrollment is tried again in total 5 times and then stopped to avoid a lock-out
-i = 0  # count
 success = False
 while not success:
     try:
-        success = asvz_enroll()
-        print("Script successfully finished")
+        success = asvz_enroll(args)
     except:
-        if i < 4:
-            i += 1
-            print("Enrollment failed. Start try number {}".format(i + 1))
-            pass
-        else:
-            raise
+        raise
+print("Script successfully finished")
