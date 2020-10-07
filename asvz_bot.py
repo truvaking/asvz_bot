@@ -3,6 +3,7 @@
 """
 Created on: Mar 20, 2019
 Author: Julian Stiefel
+Edited: Patrick Barton, October 2020
 License: BSD 3-Clause
 Description: Script for automatic enrollment in ASVZ classes
 """
@@ -16,36 +17,50 @@ password = 'xxxx'
 ###############################################################################
 
 import time
+import math
 import argparse
 import configparser
-from datetime import datetime
+import geckodriver_autoinstaller
+from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
-import geckodriver_autoinstaller
+
+
+day2int = {'Montag': 0,
+           'Dienstag': 1,
+           'Mittwoch': 2,
+           'Donnerstag': 3,
+           'Freitag': 4,
+           'Samstag': 5,
+           'Sonntag': 6}
 
 
 def waiting_fct():
-    # if script is started before registration time. Does only work if script is executed on day before event.
-    currentTime = datetime.today()
-    enrollmentTime = datetime.strptime(config['default']['lesson_time'], '%H:%M')
-    enrollmentTime = enrollmentTime.replace(
-        hour=enrollmentTime.hour + (24 - config['default'].getint('enrollment_time_difference')))
+    def get_lesson_datetime(day, train_time):
+        # find next date with that weekday
+        nextDate = datetime.today().date()
+        while nextDate.weekday() != day2int[day]:
+            nextDate += timedelta(days=1)
 
-    while currentTime.hour < enrollmentTime.hour:
-        print("Wait for enrollment to open")
-        time.sleep(60)
-        currentTime = datetime.today()
+        # combine with training time for complete date and time object
+        lessonTime = datetime.strptime(train_time, '%H:%M').time()
+        return datetime.combine(nextDate, lessonTime)
 
-    if currentTime.hour == enrollmentTime.hour:
-        while currentTime.minute < enrollmentTime.minute:
-            print("Wait for enrollment to open")
-            time.sleep(30)
-            currentTime = datetime.today()
+    lessonTime = get_lesson_datetime(config['default']['day'], config['default']['lesson_time'])
+    enrollmentTime = lessonTime - timedelta(hours=config['default'].getint('enrollment_time_difference'))
 
+    # Wait till enrollment opens if script is started before registration time
+    delta = enrollmentTime - datetime.today()
+    while delta > timedelta(seconds=0):
+        delta = enrollmentTime - datetime.today()
+        print("Time till enrollment opens: " + str(delta))
+        if delta < timedelta(minutes=1):
+            time.sleep(math.ceil(delta.total_seconds()))
+        else:
+            time.sleep(60)
     return
 
 
@@ -56,13 +71,25 @@ def asvz_enroll(args):
     options.add_argument("--private")  # open in private mode to avoid different login scenario
     driver = webdriver.Firefox(options=options)
 
-    print('Trying to get sportfahrplan')
+    print('Attempting to get sportfahrplan')
     driver.get(config['default']['sportfahrplan_particular'])
     driver.implicitly_wait(5)  # wait 5 seconds if not defined differently
-    print("Headless Firefox Initialized")
+    print("Sportfahrplan retrieved")
+
     # find corresponding day div:
     day_ele = driver.find_element_by_xpath(
         "//div[@class='teaser-list-calendar__day'][contains(., '" + config['default']['day'] + "')]")
+
+    # check if the lesson is already booked out
+    free_places_locator = (By.XPATH, ".//div[contains(., 'Keine freien')]")
+    try:
+        WebDriverWait(driver, 1).until(EC.visibility_of_element_located(free_places_locator))
+        print('Lesson already fully booked. Retrying in ' + str(args.retry_time) + 'min')
+        time.sleep(args.retry_time * 60)
+        return False
+    except:
+        pass
+
     # search in day div after corresponding location and time
     if config['default']['description']:
         day_ele.find_element_by_xpath(
@@ -143,4 +170,4 @@ while not success:
         success = asvz_enroll(args)
     except:
         raise
-print("Script successfully finished")
+print("Script finished successfully")
