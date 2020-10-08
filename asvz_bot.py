@@ -80,26 +80,25 @@ def asvz_enroll(args):
     day_ele = driver.find_element_by_xpath(
         "//div[@class='teaser-list-calendar__day'][contains(., '" + config['default']['day'] + "')]")
 
+    # search in day div after corresponding location and time
+    if config['default']['description']:
+        lesson_ele = day_ele.find_element_by_xpath(
+            ".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" +
+            config['default']['lesson_time'] + "')][contains(., '" + config['default'][
+                'description'] + "')]")
+    else:
+        lesson_ele = day_ele.find_element_by_xpath(
+            ".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" +
+            config['default']['lesson_time'] + "')]")  
+        
     # check if the lesson is already booked out
-    free_places_locator = (By.XPATH, ".//div[contains(., 'Keine freien')]")
-    try:
-        WebDriverWait(driver, 1).until(EC.visibility_of_element_located(free_places_locator))
+    full = len(lesson_ele.find_elements_by_xpath(".//div[contains(text(), 'Keine freien')]"))
+    if full:
         print('Lesson already fully booked. Retrying in ' + str(args.retry_time) + 'min')
         time.sleep(args.retry_time * 60)
         return False
-    except:
-        pass
 
-    # search in day div after corresponding location and time
-    if config['default']['description']:
-        day_ele.find_element_by_xpath(
-            ".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" +
-            config['default']['lesson_time'] + "')][contains(., '" + config['default'][
-                'description'] + "')]").click()
-    else:
-        day_ele.find_element_by_xpath(
-            ".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" +
-            config['default']['lesson_time'] + "')]").click()
+    lesson_ele.click()
 
     WebDriverWait(driver, args.max_wait).until(EC.element_to_be_clickable((By.XPATH,
                                                                            "//a[@class='btn btn--block btn--icon relative btn--primary-border' or @class='btn btn--block btn--icon relative btn--primary']"))).click()
