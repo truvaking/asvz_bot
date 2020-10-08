@@ -5,17 +5,17 @@ This is a simple ASVZ (Akademischer Sportverband Zürich) enrollment script for 
 
 Full instructions to set it up for automatic weekly enrollment are given below.
 
-Works on the current version of the ASVZ website as of March 2019.
+This is an adapted version from @jstiefel. It works with any enrollment time difference, will keep retrying if lesson is already booked out in case place becomes available, and uses config files for easily enrolling for different lessons. It also doesn't require to install the geckodriver.
 
 ## Installation
 
-These instructions are for Ubuntu. It was tested on Ubuntu 16.04, Python 3.5.2 and Firefox 65.0 with corresponding Geckodriver v0.24.0. Adapt to your own system if necessary.
+These instructions are for Ubuntu. It was tested on Ubuntu 18.04, Python 3.7.4 and Firefox 81.0
 
 Clone this repository:
 
 ```
 cd
-git clone https://github.com/jstiefel/asvz_bot.git
+git clone https://github.com/bartonp2/asvz_bot.git
 ```
 
 Set up new virtual environment with venv:
@@ -31,18 +31,15 @@ Install Selenium and Firefox webdriver:
 ```
 pip install --upgrade pip
 pip install selenium
-cd Downloads
-wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
-tar -xvzf geckodriver*
-chmod +x geckodriver
-sudo mv geckodriver /usr/local/bin/
-rm geckodriver-v0.24.0-linux64.tar.gz
+pip install geckodriver-autoinstaller
 deactivate
 ```
 
 ## Run
 
-Enter your login credentials, the link to the corresponding "Sportfahrplan", day, time and facility on top in asvz_bot.py. Your data is safe since it just uses your own webbrowser. But only use it on your private device since credentials are saved in this file as plain text. 
+Enter your login credentials in the credentials.ini file. These will be reused for all your registrations
+
+For each lesson you want to register create a config file like the 'config.ini' example. Link to the corresponding "Sportfahrplan", day, time and facility. Your data is safe since it just uses your own webbrowser. But only use it on your private device since credentials are saved in this file as plain text. 
 
 There are two methods to use this script:
 
@@ -57,7 +54,7 @@ Run script once for single enrollment at defined time on the day before enrollme
 cd 
 source asvz_bot_python/bin/activate
 cd asvz_bot
-python asvz_bot.py
+python asvz_bot.py config.ini
 ```
 
 ### 2. Create a cron job
@@ -71,7 +68,7 @@ crontab -e
 To run enrollment for example at 21:30 each Tuesday, enter:
 
 ```
-30 21 * * 2 python asvz_bot.py
+30 21 * * 2 python asvz_bot.py config.ini
 # Shell variable for cron
 SHELL=/bin/bash
 # PATH variable for cron

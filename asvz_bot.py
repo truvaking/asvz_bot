@@ -8,14 +8,6 @@ License: BSD 3-Clause
 Description: Script for automatic enrollment in ASVZ classes
 """
 
-############################# Edit this: ######################################
-
-# ETH credentials:
-username = 'xxxx'
-password = 'xxxx'
-
-###############################################################################
-
 import time
 import math
 import argparse
@@ -49,8 +41,8 @@ def waiting_fct():
         lessonTime = datetime.strptime(train_time, '%H:%M').time()
         return datetime.combine(nextDate, lessonTime)
 
-    lessonTime = get_lesson_datetime(config['default']['day'], config['default']['lesson_time'])
-    enrollmentTime = lessonTime - timedelta(hours=config['default'].getint('enrollment_time_difference'))
+    lessonTime = get_lesson_datetime(config['lesson']['day'], config['lesson']['lesson_time'])
+    enrollmentTime = lessonTime - timedelta(hours=config['lesson'].getint('enrollment_time_difference'))
 
     # Wait till enrollment opens if script is started before registration time
     delta = enrollmentTime - datetime.today()
@@ -72,25 +64,25 @@ def asvz_enroll(args):
     driver = webdriver.Firefox(options=options)
 
     print('Attempting to get sportfahrplan')
-    driver.get(config['default']['sportfahrplan_particular'])
+    driver.get(config['lesson']['sportfahrplan_particular'])
     driver.implicitly_wait(5)  # wait 5 seconds if not defined differently
     print("Sportfahrplan retrieved")
 
     # find corresponding day div:
     day_ele = driver.find_element_by_xpath(
-        "//div[@class='teaser-list-calendar__day'][contains(., '" + config['default']['day'] + "')]")
+        "//div[@class='teaser-list-calendar__day'][contains(., '" + config['lesson']['day'] + "')]")
 
     # search in day div after corresponding location and time
-    if config['default']['description']:
+    if config['lesson']['description']:
         lesson_ele = day_ele.find_element_by_xpath(
-            ".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" +
-            config['default']['lesson_time'] + "')][contains(., '" + config['default'][
+            ".//li[@class='btn-hover-parent'][contains(., '" + config['lesson']['facility'] + "')][contains(., '" +
+            config['lesson']['lesson_time'] + "')][contains(., '" + config['lesson'][
                 'description'] + "')]")
     else:
         lesson_ele = day_ele.find_element_by_xpath(
-            ".//li[@class='btn-hover-parent'][contains(., '" + config['default']['facility'] + "')][contains(., '" +
-            config['default']['lesson_time'] + "')]")  
-        
+            ".//li[@class='btn-hover-parent'][contains(., '" + config['lesson']['facility'] + "')][contains(., '" +
+            config['lesson']['lesson_time'] + "')]")
+
     # check if the lesson is already booked out
     full = len(lesson_ele.find_elements_by_xpath(".//div[contains(text(), 'Keine freien')]"))
     if full:
@@ -117,8 +109,8 @@ def asvz_enroll(args):
     organization.send_keys('ETH Zurich')
     organization.send_keys(u'\ue006')
 
-    driver.find_element_by_xpath("//input[@id='username']").send_keys(username)
-    driver.find_element_by_xpath("//input[@id='password']").send_keys(password)
+    driver.find_element_by_xpath("//input[@id='username']").send_keys(config['creds']['username'])
+    driver.find_element_by_xpath("//input[@id='password']").send_keys(config['creds']['password'])
     driver.find_element_by_xpath("//button[@type='submit']").click()
 
     enroll_button_locator = (By.XPATH,
@@ -159,10 +151,11 @@ args = parser.parse_args()
 
 config = configparser.ConfigParser(allow_no_value=True)
 config.read(args.config_file)
+config.read('credentials.ini')
 
 waiting_fct()
 
-# if there is an exception (no registration possible), enrollment is tried again in total 5 times and then stopped to avoid a lock-out
+# If lesson is already fully booked keep retrying in case place becomes available again
 success = False
 while not success:
     try:
