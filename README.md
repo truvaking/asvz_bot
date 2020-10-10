@@ -32,6 +32,7 @@ Install Selenium and Firefox webdriver:
 pip install --upgrade pip
 pip install selenium
 pip install geckodriver-autoinstaller
+pip install telegram-send
 deactivate
 ```
 
@@ -39,7 +40,7 @@ deactivate
 
 Enter your login credentials in the credentials.ini file. These will be reused for all your registrations
 
-For each lesson you want to register create a config file like the 'config.ini' example. Link to the corresponding "Sportfahrplan", day, time and facility. Your data is safe since it just uses your own webbrowser. But only use it on your private device since credentials are saved in this file as plain text. 
+For each lesson you want to register create a config file like the 'config.ini' example. Link to the corresponding "Sportfahrplan", day, time and facility. Your data is safe since it just uses your own webbrowser. But only use it on your private device since credentials are saved in this file as plain text.
 
 There are two methods to use this script:
 
@@ -77,4 +78,14 @@ PATH=/usr/local/bin:/usr/local/sbin:/sbin:/usr/sbin:/bin:/usr/bin:/usr/bin/X11
 # m h  dom mon dow   command
 30 21 * * 3 /home/<user>/asvz_bot_python/bin/python /home/<user>/asvz_bot/asvz_bot.py > /home/<user>/asvz_bot/asvz.log 2>&1
 ```
+
+## Telegram Notifications
+
+To receive telegram notifications when the enrollment worked or an error occurred:
+
+1. Create a telegram bot with the botfather
+2. Run `telegram-send --configure` and paste in the token from your telegram bot
+3. Use the -t option when running asvz.py
+
+
 

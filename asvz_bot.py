@@ -12,6 +12,7 @@ import time
 import math
 import argparse
 import configparser
+import telegram_send
 import geckodriver_autoinstaller
 from datetime import datetime, timedelta
 from selenium import webdriver
@@ -147,6 +148,7 @@ parser.add_argument('config_file', type=str, help='config file name')
 parser.add_argument('--retry_time', type=int, default=5,
                     help='Time between retrying when class is already fully booked in seconds')
 parser.add_argument('--max_wait', type=int, default=20, help='Max driver wait time (s) when attempting an action')
+parser.add_argument('-t', '--telegram_notifications', action='store_true', help='Whether to use telegram-send for notifications')
 args = parser.parse_args()
 
 config = configparser.ConfigParser(allow_no_value=True)
@@ -161,5 +163,10 @@ while not success:
     try:
         success = asvz_enroll(args)
     except:
+        if args.telegram_notifications:
+            telegram_send.send(messages=['Script stopped. Exception occurred :('])
         raise
+
+if args.telegram_notifications:
+    telegram_send.send(messages=['Enrolled successfully :D'])
 print("Script finished successfully")
