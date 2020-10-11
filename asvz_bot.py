@@ -88,6 +88,7 @@ def asvz_enroll(args):
     full = len(lesson_ele.find_elements_by_xpath(".//div[contains(text(), 'Keine freien')]"))
     if full:
         print('Lesson already fully booked. Retrying in ' + str(args.retry_time) + 'min')
+        driver.quit()
         time.sleep(args.retry_time * 60)
         return False
 
@@ -120,12 +121,14 @@ def asvz_enroll(args):
         WebDriverWait(driver, args.max_wait).until(EC.visibility_of_element_located(enroll_button_locator))
     except:
         print('Element not visible. Probably fully booked. Retrying in ' + str(args.retry_time) + 'min')
+        driver.quit()
         time.sleep(args.retry_time * 60)
         return False
 
     try:
         enroll_button = WebDriverWait(driver, args.max_wait).until(EC.element_to_be_clickable(enroll_button_locator))
     except:
+        driver.quit()
         raise ('Enroll button is disabled. Enrollment is likely not open yet.')
 
     enroll_button.click()
