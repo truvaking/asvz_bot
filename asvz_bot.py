@@ -48,12 +48,12 @@ def waiting_fct():
     # Wait till enrollment opens if script is started before registration time
     delta = enrollmentTime - datetime.today()
     while delta > timedelta(seconds=0):
-        delta = enrollmentTime - datetime.today()
         print("Time till enrollment opens: " + str(delta))
         if delta < timedelta(minutes=1):
             time.sleep(math.ceil(delta.total_seconds()))
         else:
             time.sleep(60)
+        delta = enrollmentTime - datetime.today()
     return
 
 
