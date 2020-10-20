@@ -51,8 +51,12 @@ def waiting_fct():
         print("Time till enrollment opens: " + str(delta))
         if delta < timedelta(minutes=1):
             time.sleep(math.ceil(delta.total_seconds()))
-        else:
+        elif delta < timedelta(minutes=5):
             time.sleep(60)
+        elif delta < timedelta(hours=1):
+            time.sleep(5*60)
+        else:
+            time.sleep(60*60)
         delta = enrollmentTime - datetime.today()
     return
 
@@ -114,6 +118,7 @@ def asvz_enroll(args):
     driver.find_element_by_xpath("//input[@id='username']").send_keys(config['creds']['username'])
     driver.find_element_by_xpath("//input[@id='password']").send_keys(config['creds']['password'])
     driver.find_element_by_xpath("//button[@type='submit']").click()
+    print('Logged in')
 
     enroll_button_locator = (By.XPATH,
                              "//button[@id='btnRegister' and @class='btn-primary btn enrollmentPlacePadding ng-star-inserted']")
