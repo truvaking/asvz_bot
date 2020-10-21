@@ -1,11 +1,26 @@
 # ASVZ Bot - Automatic Enrollment Script
 
 
-This is a simple ASVZ (Akademischer Sportverband Zürich) enrollment script for people who always miss the enrollment period of classes as cycling, rowing, etc. It is based on Python with Selenium. Currently, it only works with an ETH Zurich login, but it is quite easy to adapt it to other institutions (which I can't try since I don't have access).
+This is a simple ASVZ (Akademischer Sportverband Zürich) enrollment script for people who always miss the enrollment period of classes as cycling, rowing, etc. It is based on Python with Selenium.
 
 Full instructions to set it up for automatic weekly enrollment are given below.
 
-This is an adapted version from @jstiefel. It works with any enrollment time difference, will keep retrying if lesson is already booked out in case place becomes available, and uses config files for easily enrolling for different lessons. It also doesn't require to install the geckodriver.
+This is an adapted version from @jstiefel and @bartonp2.
+
+## New Features
+
+* Tested for ZHAW
+* When lesson not found on first page, load more and search again.
+* Sends Telegram message with lesson information.
+* Templates for `config.ini` and `credentials.ini`
+* simplified installation
+
+----
+
+* It works with any enrollment time difference
+* will keep retrying if lesson is already booked out in case place becomes available
+* uses config files for easily enrolling for different lessons
+* It also doesn't require to install the geckodriver
 
 ## Installation
 
@@ -15,7 +30,7 @@ Clone this repository:
 
 ```
 cd
-git clone https://github.com/bartonp2/asvz_bot.git
+git clone git@github.com:matteodelucchi/asvz_bot.git
 ```
 
 Set up new virtual environment with venv:
@@ -30,9 +45,7 @@ Install Selenium and Firefox webdriver:
 
 ```
 pip install --upgrade pip
-pip install selenium
-pip install geckodriver-autoinstaller
-pip install telegram-send
+pip install -r REQUIREMENTS.txt
 deactivate
 ```
 
@@ -55,7 +68,7 @@ Run script once for single enrollment at defined time on the day before enrollme
 cd 
 source asvz_bot_python/bin/activate
 cd asvz_bot
-python asvz_bot.py config.ini
+python asvz_bot.py config.ini --retry_time 5 --max_wait 20 -t
 ```
 
 ### 2. Create a cron job
