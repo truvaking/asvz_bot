@@ -7,9 +7,9 @@ Full instructions to set it up for automatic weekly enrollment are given below.
 
 This is an adapted version from @jstiefel and @bartonp2.
 
-## New Features
+## Features
 
-* Tested for ZHAW
+* Tested for ETH and ZHAW
 * When lesson not found on first page, load more and search again.
 * Sends Telegram message with lesson information.
 * Templates for `config.ini` and `credentials.ini`
@@ -30,7 +30,7 @@ Clone this repository:
 
 ```
 cd
-git clone git@github.com:matteodelucchi/asvz_bot.git
+git clone https://github.com/bartonp2/asvz_bot.git
 ```
 
 Set up new virtual environment with venv:
@@ -68,7 +68,7 @@ Run script once for single enrollment at defined time on the day before enrollme
 cd 
 source asvz_bot_python/bin/activate
 cd asvz_bot
-python asvz_bot.py config.ini --retry_time 5 --max_wait 20 -t
+python asvz_bot.py config.ini
 ```
 
 ### 2. Create a cron job
@@ -99,6 +99,5 @@ To receive telegram notifications when the enrollment worked or an error occurre
 1. Create a telegram bot with the botfather
 2. Run `telegram-send --configure` and paste in the token from your telegram bot
 3. Use the -t option when running asvz.py
-
 
 

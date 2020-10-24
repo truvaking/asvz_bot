@@ -3,7 +3,7 @@
 """
 Created on: Mar 20, 2019
 Author: Julian Stiefel
-Edited: Patrick Barton, October 2020 and Matteo Delucchi, October 2020
+Edited: Patrick Barton and Matteo Delucchi, October 2020
 License: BSD 3-Clause
 Description: Script for automatic enrollment in ASVZ classes
 """
