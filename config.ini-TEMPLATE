@@ -1,11 +1,11 @@
 [lesson]
-day = Donnerstag
-facility = Sport Center Hönggerberg
-lesson_time = 15:00
+day = Mittwoch
+facility = Sport Center Winterthur
+lesson_time = 20:45
 # how many hours before registration starts
 enrollment_time_difference = 24
 #link to particular sport on ASVZ Sportfahrplan, e.g. cycling class:
-sportfahrplan_particular = https://www.asvz.ch/426-sportfahrplan?f[0]=sport:80587
-description
+sportfahrplan_particular = https://www.asvz.ch/426-sportfahrplan?f[0]=sport:122920
 # if training needs to specified further use line below
 #description = Trampolin
+description

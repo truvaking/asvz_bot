@@ -1,9 +1,9 @@
-#!/home/<user>/asvz_bot_python/bin/python
+#!/home/delt/asvz_bot/asvz_bot/bin/python
 
 """
 Created on: Mar 20, 2019
 Author: Julian Stiefel
-Edited: Patrick Barton, October 2020
+Edited: Patrick Barton and Matteo Delucchi, October 2020
 License: BSD 3-Clause
 Description: Script for automatic enrollment in ASVZ classes
 """
@@ -20,7 +20,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-
+from selenium.common.exceptions import NoSuchElementException
 
 day2int = {'Montag': 0,
            'Dienstag': 1,
@@ -79,14 +79,38 @@ def asvz_enroll(args):
 
     # search in day div after corresponding location and time
     if config['lesson']['description']:
-        lesson_ele = day_ele.find_element_by_xpath(
+        try:
+            lesson_ele = day_ele.find_element_by_xpath(
             ".//li[@class='btn-hover-parent'][contains(., '" + config['lesson']['facility'] + "')][contains(., '" +
-            config['lesson']['lesson_time'] + "')][contains(., '" + config['lesson'][
-                'description'] + "')]")
+            config['lesson']['lesson_time'] + 'bis'"')][contains(., '" + config['lesson']['description'] + "')]")
+
+        except NoSuchElementException as identifier:
+            # click on "load more" button
+            driver.find_element_by_xpath("//button[@class='btn btn--primary separator__btn']").click()
+
+            lesson_ele = day_ele.find_element_by_xpath(
+            ".//li[@class='btn-hover-parent'][contains(., '" + config['lesson']['facility'] + "')][contains(., '" +
+            config['lesson']['lesson_time'] + 'bis'"')][contains(., '" + config['lesson']['description'] + "')]")
+        finally:
+            print("Booking: ", lesson_ele.text)
+
+
+        
     else:
-        lesson_ele = day_ele.find_element_by_xpath(
+        try:
+            lesson_ele = day_ele.find_element_by_xpath(
             ".//li[@class='btn-hover-parent'][contains(., '" + config['lesson']['facility'] + "')][contains(., '" +
-            config['lesson']['lesson_time'] + "')]")
+            config['lesson']['lesson_time'] + 'bis'"')]")
+
+        except NoSuchElementException as identifier:
+            # click on "load more" button
+            driver.find_element_by_xpath("//button[@class='btn btn--primary separator__btn']").click()
+
+            lesson_ele = day_ele.find_element_by_xpath(
+            ".//li[@class='btn-hover-parent'][contains(., '" + config['lesson']['facility'] + "')][contains(., '" +
+            config['lesson']['lesson_time'] + 'bis'"')]")
+        finally:
+            print("Booking: \n", lesson_ele.text)
 
     # check if the lesson is already booked out
     full = len(lesson_ele.find_elements_by_xpath(".//div[contains(text(), 'Keine freien')]"))
@@ -95,6 +119,9 @@ def asvz_enroll(args):
         driver.quit()
         time.sleep(args.retry_time * 60)
         return False
+
+    # Save Lesson information for Telegram Message
+    message = lesson_ele.text
 
     lesson_ele.click()
 
@@ -112,7 +139,7 @@ def asvz_enroll(args):
 
     # choose organization:
     organization = driver.find_element_by_xpath("//input[@id='userIdPSelection_iddtext']")
-    organization.send_keys('ETH Zurich')
+    organization.send_keys(config['creds']['organisation'])
     organization.send_keys(u'\ue006')
 
     driver.find_element_by_xpath("//input[@id='username']").send_keys(config['creds']['username'])
@@ -176,5 +203,5 @@ while not success:
         raise
 
 if args.telegram_notifications:
-    telegram_send.send(messages=['Enrolled successfully :D'])
+    telegram_send.send(messages=['Enrolled successfully :D', "------------", message])
 print("Script finished successfully")

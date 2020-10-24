@@ -1,11 +1,26 @@
 # ASVZ Bot - Automatic Enrollment Script
 
 
-This is a simple ASVZ (Akademischer Sportverband Zürich) enrollment script for people who always miss the enrollment period of classes as cycling, rowing, etc. It is based on Python with Selenium. Currently, it only works with an ETH Zurich login, but it is quite easy to adapt it to other institutions (which I can't try since I don't have access).
+This is a simple ASVZ (Akademischer Sportverband Zürich) enrollment script for people who always miss the enrollment period of classes as cycling, rowing, etc. It is based on Python with Selenium.
 
 Full instructions to set it up for automatic weekly enrollment are given below.
 
-This is an adapted version from @jstiefel. It works with any enrollment time difference, will keep retrying if lesson is already booked out in case place becomes available, and uses config files for easily enrolling for different lessons. It also doesn't require to install the geckodriver.
+This is an adapted version from @jstiefel and @bartonp2.
+
+## Features
+
+* Tested for ETH and ZHAW
+* When lesson not found on first page, load more and search again.
+* Sends Telegram message with lesson information.
+* Templates for `config.ini` and `credentials.ini`
+* simplified installation
+
+----
+
+* It works with any enrollment time difference
+* will keep retrying if lesson is already booked out in case place becomes available
+* uses config files for easily enrolling for different lessons
+* It also doesn't require to install the geckodriver
 
 ## Installation
 
@@ -30,9 +45,7 @@ Install Selenium and Firefox webdriver:
 
 ```
 pip install --upgrade pip
-pip install selenium
-pip install geckodriver-autoinstaller
-pip install telegram-send
+pip install -r REQUIREMENTS.txt
 deactivate
 ```
 
@@ -86,6 +99,5 @@ To receive telegram notifications when the enrollment worked or an error occurre
 1. Create a telegram bot with the botfather
 2. Run `telegram-send --configure` and paste in the token from your telegram bot
 3. Use the -t option when running asvz.py
-
 
 
