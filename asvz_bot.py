@@ -168,7 +168,7 @@ def asvz_enroll(args):
 
     WebDriverWait(driver, 2)
     driver.quit()  # close all tabs and window
-    return True
+    return message
 
 
 # ==== run enrollment script ============================================
@@ -203,5 +203,5 @@ while not success:
         raise
 
 if args.telegram_notifications:
-    telegram_send.send(messages=['Enrolled successfully :D', "------------", message])
+    telegram_send.send(messages=['Enrolled successfully :D', "------------", success])
 print("Script finished successfully")
