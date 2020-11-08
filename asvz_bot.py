@@ -78,39 +78,17 @@ def asvz_enroll(args):
         "//div[@class='teaser-list-calendar__day'][contains(., '" + config['lesson']['day'] + "')]")
 
     # search in day div after corresponding location and time
+    lesson_xpath = ".//li[@class='btn-hover-parent'][contains(., '" + config['lesson']['facility'] + "')][contains(., '" \
+                        + config['lesson']['lesson_time'] + 'bis'"')]"
     if config['lesson']['description']:
-        try:
-            lesson_ele = day_ele.find_element_by_xpath(
-            ".//li[@class='btn-hover-parent'][contains(., '" + config['lesson']['facility'] + "')][contains(., '" +
-            config['lesson']['lesson_time'] + 'bis'"')][contains(., '" + config['lesson']['description'] + "')]")
+        lesson_xpath += "[contains(., '" + config['lesson']['description'] + "')]"
 
-        except NoSuchElementException as identifier:
-            # click on "load more" button
-            driver.find_element_by_xpath("//button[@class='btn btn--primary separator__btn']").click()
-
-            lesson_ele = day_ele.find_element_by_xpath(
-            ".//li[@class='btn-hover-parent'][contains(., '" + config['lesson']['facility'] + "')][contains(., '" +
-            config['lesson']['lesson_time'] + 'bis'"')][contains(., '" + config['lesson']['description'] + "')]")
-        finally:
-            print("Booking: ", lesson_ele.text)
-
-
-        
-    else:
-        try:
-            lesson_ele = day_ele.find_element_by_xpath(
-            ".//li[@class='btn-hover-parent'][contains(., '" + config['lesson']['facility'] + "')][contains(., '" +
-            config['lesson']['lesson_time'] + 'bis'"')]")
-
-        except NoSuchElementException as identifier:
-            # click on "load more" button
-            driver.find_element_by_xpath("//button[@class='btn btn--primary separator__btn']").click()
-
-            lesson_ele = day_ele.find_element_by_xpath(
-            ".//li[@class='btn-hover-parent'][contains(., '" + config['lesson']['facility'] + "')][contains(., '" +
-            config['lesson']['lesson_time'] + 'bis'"')]")
-        finally:
-            print("Booking: \n", lesson_ele.text)
+    try:
+        lesson_ele = day_ele.find_element_by_xpath(lesson_xpath)
+    except NoSuchElementException as identifier:
+        # click on "load more" button
+        driver.find_element_by_xpath("//button[@class='btn btn--primary separator__btn']").click()
+        lesson_ele = day_ele.find_element_by_xpath(lesson_xpath)
 
     # check if the lesson is already booked out
     full = len(lesson_ele.find_elements_by_xpath(".//div[contains(text(), 'Keine freien')]"))
@@ -122,11 +100,12 @@ def asvz_enroll(args):
 
     # Save Lesson information for Telegram Message
     message = lesson_ele.text
+    print("Booking: ", message)
 
     lesson_ele.click()
 
     WebDriverWait(driver, args.max_wait).until(EC.element_to_be_clickable((By.XPATH,
-                                                                           "//a[@class='btn btn--block btn--icon relative btn--primary-border' or @class='btn btn--block btn--icon relative btn--primary']"))).click()
+            "//a[@class='btn btn--block btn--icon relative btn--primary-border' or @class='btn btn--block btn--icon relative btn--primary']"))).click()
 
     # switch to new window:
     time.sleep(2)  # necessary because tab needs to be open to get window handles
@@ -163,6 +142,7 @@ def asvz_enroll(args):
         driver.quit()
         raise ('Enroll button is disabled. Enrollment is likely not open yet.')
 
+    print('Waiting for enroll button to be enabled')
     WebDriverWait(driver, 90).until(lambda d: 'disabled' not in enroll_button.get_attribute('class'))
     enroll_button.click()
     print("Successfully enrolled. Train hard and have fun!")
