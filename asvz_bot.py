@@ -47,7 +47,7 @@ def waiting_fct():
 
     # Wait till enrollment opens if script is started before registration time
     delta = enrollmentTime - datetime.today()
-    while delta > timedelta(seconds=0):
+    while delta > timedelta(seconds=60):
         print("Time till enrollment opens: " + str(delta))
         if delta < timedelta(minutes=1):
             time.sleep(math.ceil(delta.total_seconds()))
@@ -163,6 +163,7 @@ def asvz_enroll(args):
         driver.quit()
         raise ('Enroll button is disabled. Enrollment is likely not open yet.')
 
+    WebDriverWait(driver, 90).until(lambda d: 'disabled' not in enroll_button.get_attribute('class'))
     enroll_button.click()
     print("Successfully enrolled. Train hard and have fun!")
 
