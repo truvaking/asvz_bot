@@ -111,8 +111,11 @@ def asvz_enroll():
 
         # wait for button to be clickable for 5 minutes, which is more than enough
         # still needs to be tested what happens if we are on the page before button is enabled
-        WebDriverWait(driver, 300).until(EC.element_to_be_clickable(
-            (By.XPATH, "//button[@id='btnRegister' and @class='btn-primary btn enrollmentPlacePadding ng-star-inserted']"))).click()
+        print("Waiting for enrollment opening")
+        elem = WebDriverWait(driver, 300).until(EC.element_to_be_clickable(
+            (By.XPATH, "//button[@id='btnRegister' and @class='btn-primary btn enrollmentPlacePadding ng-star-inserted']")))
+        time.sleep(2)
+        elem.click()
         print("Successfully enrolled. Train hard and have fun!")
     # using non-specific exceptions, since there are different exceptions possible: timeout, element not found because not loaded, etc.
     except:
